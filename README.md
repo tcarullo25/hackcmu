@@ -36,6 +36,6 @@ Space Navigate is an application that lets you navigate through the solar system
 ## Authors
 
 - [Tim Carullo](mailto:tcarullo@andrew.cmu.edu)
-- [Sam Chen](mailto:samuelch@andrew.cmu.edu)
-- [Ethan Kwong](mailto:jieunlim@andrew.cmu.edu)
-- [Jieun Lim](mailto:ethankwo@andrew.cmu.edu)
+- [Samuel Chen](mailto:samuelch@andrew.cmu.edu)
+- [Ethan Kwong](mailto:ethankwo@andrew.cmu.edu)
+- [Jieun Lim](mailto:jieunlim@andrew.cmu.edu)
