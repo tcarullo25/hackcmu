@@ -20,6 +20,8 @@ def onAppStart(app):
     app.distances = [20, 50, 80, 110, 220, 280, 330, 380, 430]
     app.planetColors = ['gray', 'darkRed', 'blue', 'red',
                         'orange', 'gold', 'skyBlue', 'mediumBlue', 'gray']
+    app.planetLabel = None
+    app.px, app.py = None, None
 
     app.rocketImage = Image.open('rocket.png')
     app.rocketImage = CMUImage(app.rocketImage)
@@ -61,8 +63,21 @@ def onMouseMove(app, mouseX, mouseY):
         app.largeHover = False
     if distance(mouseX, mouseY, app.width / 2, app.height / 2) < 20:
         app.sunHover = True
+        return
     else:
         app.sunHover = False
+
+    if app.paused:
+        for i in range(len(app.planets)):
+            planet = app.planets[i]
+            px, py = polarToRectangular(app, app.distances[i], planet.theta)
+            if distance(mouseX, mouseY, px, py) < 20:
+                app.px, app.py = px, py
+                app.planetLabel = planet.planet
+                return
+            else:
+                app.px, app.py = None, None
+                app.planetLabel = None
 
 
 def onMousePress(app, mouseX, mouseY):
@@ -80,6 +95,23 @@ def redrawAll(app):
     drawSun(app)
     drawScaleButtons(app)
     drawRocket(app)
+    drawLabels(app)
+
+
+def drawLabels(app):
+    if app.planetLabel is not None:
+        drawRect(app.px - 50, app.py - 40, 100,
+                 30, fill='gray', border='white')
+        drawLabel(app.planetLabel, app.px, app.py - 25, size=16, fill='white')
+    elif app.sunHover:
+        drawRect(400, 340, 200, 40, fill='gray', border='white')
+        drawLabel('Sun is not to scale', 500, 360, size=16, fill='white')
+    elif app.smallHover:
+        drawRect(830, 700, 110, 40, fill='gray', border='white')
+        drawLabel('To scale size', 885, 720, size=16, fill='white')
+    elif app.largeHover:
+        drawRect(880, 700, 110, 40, fill='gray', border='white')
+        drawLabel('To view size', 935, 720, size=16, fill='white')
 
 
 def drawRocket(app):
@@ -90,18 +122,14 @@ def drawRocket(app):
 def drawSun(app):
     drawCircle(app.width/2, app.height/2, 10, fill="yellow")
 
-    if app.sunHover:
-        drawRect(400, 340, 200, 40, fill='gray', border='white')
-        drawLabel('Sun is not to scale', 500, 360, size=16, fill='white')
-
 
 def drawPlanets(app):
     for i in range(len(app.planets)):
         planet = app.planets[i]
         radius = max(planet.diameter / 9000,
                      2) if app.scaleView else math.sqrt(planet.diameter) / 15
-        distance, theta = app.distances[i], planet.theta
-        cx, cy = polarToRectangular(app, distance, theta)
+        dFromSun, theta = app.distances[i], planet.theta
+        cx, cy = polarToRectangular(app, dFromSun, theta)
         color = app.planetColors[i]
 
         # Orbit path
@@ -120,14 +148,6 @@ def drawScaleButtons(app):
     drawLabel('_', 885, 762, fill='white', size=24, bold=True)
     drawRect(920, 750, 30, 30, fill='gray', border=largeBorder)
     drawLabel('+', 935, 765, fill='white', size=24)
-
-    if app.smallHover:
-        drawRect(830, 700, 110, 40, fill='gray', border='white')
-        drawLabel('To scale size', 885, 720, size=16, fill='white')
-
-    if app.largeHover:
-        drawRect(880, 700, 110, 40, fill='gray', border='white')
-        drawLabel('To view size', 935, 720, size=16, fill='white')
 
 
 def main():
