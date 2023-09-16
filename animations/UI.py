@@ -13,7 +13,7 @@ class Star:
 
 
 def initStar(app):
-    app.deathTime = random.randint(50, 200)
+    app.deathTime = random.randint(50, 100)
     app.curAngle = 1
     app.starList = []
     app.universe = CMUImage(Image.open('night1.jpg'))
