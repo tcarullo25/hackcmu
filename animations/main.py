@@ -1,5 +1,6 @@
 from cmu_graphics import *
 from utils import *
+from PIL import Image
 import math
 import random
 
@@ -19,11 +20,17 @@ def onAppStart(app):
     app.distances = [20, 50, 80, 110, 220, 280, 330, 380, 430]
     app.planetColors = ['gray', 'darkRed', 'blue', 'red',
                         'orange', 'gold', 'skyBlue', 'mediumBlue', 'gray']
+
+    app.rocketImage = Image.open('rocket.png')
+    app.rocketImage = CMUImage(app.rocketImage)
+    app.rocketAngle = 45
+
     app.scaleView = False
+    app.paused = False
+
     app.smallHover = False
     app.largeHover = False
     app.sunHover = False
-    app.paused = False
 
 
 def onKeyPress(app, key):
@@ -67,14 +74,17 @@ def onMousePress(app, mouseX, mouseY):
 
 def redrawAll(app):
     drawRect(0, 0, app.width, app.height, fill="black")
-
     # Planets
     drawPlanets(app)
-
     # Sun
     drawSun(app)
-
     drawScaleButtons(app)
+    drawRocket(app)
+
+
+def drawRocket(app):
+    drawImage(app.rocketImage, app.width/2, app.height /
+              2, align='center', rotateAngle=app.rocketAngle, width=30, height=30)
 
 
 def drawSun(app):
