@@ -2,6 +2,7 @@ from cmu_graphics import *
 from utils import *
 from PIL import Image
 from UI import *
+from splash import *
 from scripts.run_calculations import run_matlab_script
 import math
 import random
@@ -47,6 +48,7 @@ def initRocket(app):
 
 def onAppStart(app):
     app.onSplashScreen = True
+    app.onInfoScreen = False
     initPlanets(app)
     initRocket(app)
     initStar(app)
@@ -59,6 +61,8 @@ def onAppStart(app):
     app.sunHover = False
     app.toggleBackground = False
     app.steps = 0
+
+    app.bkground = CMUImage(Image.open('night1.jpg'))
 
 
 def getRocketInputs(app):
@@ -75,6 +79,14 @@ def getRocketInputs(app):
 
 
 def onKeyPress(app, key):
+    if key == 'g' and app.onInfoScreen:
+        app.onInfoScreen = False
+        app.onSplashScreen = False
+    elif key == 'g' and not app.onInfoScreen:
+        app.paused = True
+        app.onSplashScreen = False
+        app.onInfoScreen = True
+        return
     if not app.onSplashScreen:
         if key == 'space':
             app.paused = not app.paused
@@ -184,6 +196,8 @@ def drawSplashScreen(app):
 def redrawAll(app):
     if app.onSplashScreen:
         drawSplashScreen(app)
+    elif app.onInfoScreen:
+        drawInfoScreen(app)
     else:
         if app.toggleBackground:
             drawStars(app)
