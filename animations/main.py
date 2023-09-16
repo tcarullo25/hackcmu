@@ -2,6 +2,7 @@ from cmu_graphics import *
 from utils import *
 from PIL import Image
 from UI import *
+from scripts.run_calculations import run_matlab_script
 import math
 import random
 
@@ -34,8 +35,14 @@ def initRocket(app):
     app.rocketImage = CMUImage(app.rocketImage)
     app.bg = Image.open('background.jpg')
     app.bg = CMUImage(app.bg)
-    app.rocketAngle = 45
+    app.rocketAngle = 0
+    app.rocketAngleOffset = 45
+    app.rocketSpeed = 40
+    app.rDx = random.randint(-3, 3)
+    app.rDy = random.randint(-3, 3)
+    app.isFlying = False
     app.rx, app.ry = None, None
+    app.landPlanet = None
 
 
 def onAppStart(app):
@@ -61,9 +68,10 @@ def getRocketInputs(app):
     while start.upper() not in app.planetDict:
         start = app.getTextInput("Please choose a valid planet")
     end = app.getTextInput("Choose an ending planet")
-    while end.upper() not in app.planetDict:
+    while end.upper() not in app.planetDict and end.upper() != start.upper():
         end = app.getTextInput("Please choose a valid planet")
-    app.startPlanet, app.endPlanet = app.planetDict(start), app.planetDict(end)
+    start, end = start.upper(), end.upper()
+    app.startPlanet, app.endPlanet = app.planetDict[start], app.planetDict[end]
 
 
 def onKeyPress(app, key):
@@ -73,12 +81,24 @@ def onKeyPress(app, key):
         if key == 's':
             for planet in app.planets:
                 planet.dTheta /= 1.5
+            app.rDx /= 1.5
+            app.rDy /= 1.5
         if key == 'f':
             for planet in app.planets:
                 planet.dTheta *= 1.5
+            app.rDx *= 1.5
+            app.rDy *= 1.5
         if key == 'm':
             getRocketInputs(app)
-            app.rx, app.ry = polarToRectangular()
+            startPlanet, orbitDistance1, _ = app.startPlanet
+            endPlanet, orbitDistance2, _ = app.endPlanet
+            app.rx, app.ry = polarToRectangular(
+                app, orbitDistance1, startPlanet.theta)
+            # _, angle, _ = run_matlab_script(
+            #     startPlanet.theta, endPlanet.theta, orbitDistance1, orbitDistance2, endPlanet.orbitalVelocity, app.rocketSpeed)
+            angle = random.randint(0, 47) / 15
+            app.rocketAngle = angle
+            app.isFlying = True
         if key == 't':
             app.toggleBackground = not app.toggleBackground
 
@@ -90,6 +110,26 @@ def onStep(app):
             planet.moveStep()
         if app.toggleBackground and (app.steps % 7 == 0):
             updateStar(app)
+        if app.rx is not None and app.ry is not None and app.isFlying:
+            app.rx += app.rDx
+            app.ry += app.rDy
+            if app.rx < 0:
+                app.rDx = random.randint(1, 3)
+            if app.rx > 1000:
+                app.rDx = random.randint(-3, -1)
+            if app.ry < 0:
+                app.rDy = random.randint(1, 3)
+            if app.ry > 800:
+                app.rDy = random.randint(-3, -1)
+            planet, orbitDistance, _ = app.endPlanet
+            px, py = polarToRectangular(app, orbitDistance, planet.theta)
+            if distance(app.rx, app.ry, px, py) < 25:
+                app.rocketAngle = 0
+                app.isFlying = False
+        elif not app.isFlying and app.endPlanet is not None:
+            planet, orbitDistance, _ = app.endPlanet
+            app.rx, app.ry = polarToRectangular(
+                app, orbitDistance, planet.theta)
 
 
 def onMouseMove(app, mouseX, mouseY):
@@ -132,10 +172,14 @@ def onMousePress(app, mouseX, mouseY):
 def drawSplashScreen(app):
     drawImage(app.bg, app.width/2, app.height /
               2, align='center', width=app.width, height=app.height)
-    drawLabel('Space Navigate', app.width//2, app.height//4 + 250, size = 40,font = 'arial', fill = 'white')
-    drawLabel('By: Tim Carullo, Sam Chen, Ethan Kwong, and Jieun Lim', app.width*3//8 - 40, app.height*7//8 + 80, size = 26, fill = 'white')
-    drawRect(app.width//3 + 15, 515,  app.width*5//16, 40, fill='gray', border='white')
-    drawLabel("Start", 500, 535, bold= True, fill = 'white', size = 30)
+    drawLabel('Space Navigate', app.width//2, app.height //
+              4 + 250, size=40, font='arial', fill='white')
+    drawLabel('By: Tim Carullo, Sam Chen, Ethan Kwong, and Jieun Lim',
+              app.width*3//8 - 40, app.height*7//8 + 80, size=26, fill='white')
+    drawRect(app.width//3 + 15, 515,  app.width*5 //
+             16, 40, fill='gray', border='white')
+    drawLabel("Start", 500, 535, bold=True, fill='white', size=30)
+
 
 def redrawAll(app):
     if app.onSplashScreen:
@@ -171,7 +215,7 @@ def drawLabels(app):
 def drawRocket(app):
     if app.rx is not None and app.ry is not None:
         drawImage(app.rocketImage, app.rx, app.ry, align='center',
-                  rotateAngle=app.rocketAngle, width=30, height=30)
+                  rotateAngle=app.rocketAngle + app.rocketAngleOffset, width=30, height=30)
 
 
 def drawSun(app):
