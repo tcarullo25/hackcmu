@@ -1,4 +1,4 @@
-import subprocess
+import os, subprocess
 
 def run_matlab_script(theta1, theta2, r1, r2, omega2, v):
     error_path = "log.txt"
@@ -16,6 +16,9 @@ def run_matlab_script(theta1, theta2, r1, r2, omega2, v):
         duration = float(out[1])
         verified = bool(out[2])
     print(f"verified: {verified}; phi = {phi}; travel time = {duration}")
+
+    os.remove("temp_data.csv")
+    os.remove("out.txt")
     return (verified, phi, duration)
 
 
