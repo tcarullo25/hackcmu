@@ -38,14 +38,15 @@ def onAppStart(app):
 
 
 def onKeyPress(app, key):
-    if key == 'space':
-        app.paused = not app.paused
-    if key == 's':
-        for planet in app.planets:
-            planet.dTheta /= 1.5
-    if key == 'f':
-        for planet in app.planets:
-            planet.dTheta *= 1.5
+    if not app.onSplashScreen:
+        if key == 'space':
+            app.paused = not app.paused
+        if key == 's':
+            for planet in app.planets:
+                planet.dTheta /= 1.5
+        if key == 'f':
+            for planet in app.planets:
+                planet.dTheta *= 1.5
 
 
 def onStep(app):
