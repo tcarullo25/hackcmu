@@ -13,6 +13,8 @@ def getPlanetData():
 
 
 def onAppStart(app):
+    app.onSplashScreen = True
+
     app.planets = getPlanetData()
     for planet in app.planets:
         planet.theta = random.randint(0, 47) / 15
@@ -85,17 +87,34 @@ def onMousePress(app, mouseX, mouseY):
         app.scaleView = True
     if 920 <= mouseX <= 950 and 750 <= mouseY <= 780:
         app.scaleView = False
+    if app.width//3 + 25 <= mouseX <= 670 and 515 <= mouseY <= 555:
+        app.onSplashScreen = False
 
+def drawSplashScreen(app):
+    drawRect(0,0,app.width,app.height,fill='darkBlue')
+    drawLabel('Space Navigate', app.width//2, app.height//4 + 50, size = 40,font = 'arial', fill = 'black')
+    drawLabel('By: Tim Carullo, Sam Chen, Ethan Kwong, and Jieun Lim', app.width*3//8 - 40, app.height*7//8 + 80, size = 26, fill = 'white')
+    for i in range(len(app.planets)):
+        color = app.planetColors[i]
+
+        # Orbit path
+        drawCircle(app.width/2, app.height/2,
+                   app.distances[i], fill=None, border=color, borderWidth=1)
+    drawRect(app.width//3 + 25, 515,  app.width*5//16, 40, fill='gray', border='white')
+    drawLabel("Start", 500, 535, bold= True, fill = 'green', size = 30)
 
 def redrawAll(app):
-    drawRect(0, 0, app.width, app.height, fill="black")
-    # Planets
-    drawPlanets(app)
-    # Sun
-    drawSun(app)
-    drawScaleButtons(app)
-    drawRocket(app)
-    drawLabels(app)
+    if app.onSplashScreen:
+        drawSplashScreen(app)
+    else:
+        drawRect(0, 0, app.width, app.height, fill="black")
+        # Planets
+        drawPlanets(app)
+        # Sun
+        drawSun(app)
+        drawScaleButtons(app)
+        drawRocket(app)
+        drawLabels(app)
 
 
 def drawLabels(app):
