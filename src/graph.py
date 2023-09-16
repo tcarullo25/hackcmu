@@ -20,16 +20,22 @@ class Graph:
     def removeNode(self, node1, node2):
         if node1 not in self.adjList or node2 not in self.adjList:
             return False
-        for i in range(len(self.adjList[node1])):
-            if node2 == self.adjList[node1][i]:
-                self.adjList[node1][i].remove()
+        i = 0
+        while i < len(self.adjList[node1]):
+            if node2 == self.adjList[node1][i][0]:
+                self.adjList[node1].pop(i)
+            else:
+                i += 1
 
-        for i in range(len(self.adjList[node2])):
-            if node1 == self.adjList[node2][i]:
-                self.adjList[node2][i].remove()
+        j = 0 
+        while j < len(self.adjList[node2]):
+            if node1 == self.adjList[node2][j][0]:
+                self.adjList[node2].pop(j)
+            else:
+                j += 1
 
         return True 
     
 g = Graph(10)
-g.addNode(2,3)
+
 
