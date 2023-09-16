@@ -23,12 +23,13 @@ DATA = [['', 'Mass (1024kg)', 'Diameter (km)', 'Density (kg/m3)', 'Gravity (m/s2
 
 def planetData():
     data = None
+
+    sys.path.insert(1, '../src/')
+    from planets import Planet
+
     if TESTING:
         data = DATA
     else:
-        sys.path.insert(1, '../src/')
-        from planets import Planet
-
         URL = "https://nssdc.gsfc.nasa.gov/planetary/factsheet/"
 
         page = requests.get(URL)
@@ -43,15 +44,16 @@ def planetData():
             cols = [ele.text.strip() for ele in cols]
             data.append(cols)
 
-    data = transpose(data)
+        data = transpose(data)
+
     planets = []
 
     for pRow in data[1:]:
         planet, mass, diameter, gravity = pRow[0], pRow[1], pRow[2], pRow[4]
-        rotPeriod, v, period, dist = pRow[6], pRow[11], pRow[10], pRow[8]
+        rotPeriod, oVelo, period, dist = pRow[6], pRow[12], pRow[11], pRow[8]
         if planet == 'MOON':
             continue
         planets.append(Planet(
-            planet, mass, diameter, gravity, rotPeriod, v, period, dist))
+            planet, mass, diameter, gravity, rotPeriod, oVelo, period, dist))
 
     return planets
